@@ -1,8 +1,8 @@
 import datetime
+import time
 
-from src.collectors.first_lib_collector import FirstLibRatesCollector
+from src.collector_filters.collector_by_interval import RatesCollectorByInterval
 from src.collectors.rates_collector_abc import RatesCollector
-from src.collectors.second_lib_collector import SecondLibRatesCollector
 from src.currency_saver import CurrencySaver
 from src.dto import CurrencyStatusDTO
 
@@ -38,12 +38,16 @@ def save(
 
 def main():
     currencies = ['usd', 'euro']
-    collectors: list[RatesCollector] = [FirstLibRatesCollector(), SecondLibRatesCollector()]
-    currencies_results = get_currencies(currencies, collectors)
 
-    currency_savers = []
-    save(currency_savers, currencies_results)
+    while True:
+        collectors: list[RatesCollector] = RatesCollectorByInterval().get_collectors(
+            datetime.datetime.now()
+        )
+        currencies_results = get_currencies(currencies, collectors)
 
+        currency_savers = []
+        save(currency_savers, currencies_results)
+        time.sleep(400)
 
 
 if __name__ == '__main__':
